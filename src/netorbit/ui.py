@@ -4,6 +4,7 @@ import time
 from collections import deque
 from dataclasses import dataclass
 from queue import Empty, Queue
+from typing import ClassVar
 
 from rich.align import Align
 from rich.console import Console, Group
@@ -26,10 +27,188 @@ MAX_SIDE_CONNECTIONS_WIDTH = 58
 CONNECTIONS_PANEL_HEIGHT = 13
 MAX_ACTIVE_MARKERS = 96
 MAX_EVENTS_PER_FRAME = 128
-DESTINATION_MARKER_STYLE = Style(color="#fbbf24", bold=True)
-DESTINATION_ARRIVAL_STYLE = Style(color="#00FFFF", bold=True)
-DESTINATION_REACHED_STYLE = Style(color="#34d399", bold=True)
 
+
+@dataclass(frozen=True, slots=True)
+class Theme:
+    name: str
+    accent: str
+    background: str
+    grid: str
+    land: str
+    coast: str
+    trajectory_edge: str
+    trajectory_trail: str
+    trajectory_levels: tuple[str, str, str, str]
+    home_marker: str
+    destination_marker: str
+    destination_arrival: str
+    destination_reached: str
+    panel_border: str
+    header: str
+    muted: str
+    warning: str
+    error: str
+
+    PRESETS: ClassVar[dict[str, "Theme"]]
+
+    @classmethod
+    def from_name(cls, name: str) -> "Theme":
+        try:
+            return cls.PRESETS[name]
+        except KeyError as exc:
+            available = ", ".join(sorted(cls.PRESETS))
+            raise ValueError(f"Unknown theme '{name}'. Available themes: {available}.") from exc
+
+    @property
+    def background_style(self) -> Style:
+        return Style(color=self.background)
+
+    @property
+    def grid_style(self) -> Style:
+        return Style(color=self.grid, dim=True)
+
+    @property
+    def land_style(self) -> Style:
+        return Style(color=self.land)
+
+    @property
+    def coast_style(self) -> Style:
+        return Style(color=self.coast)
+
+    @property
+    def trajectory_edge_style(self) -> Style:
+        return Style(color=self.trajectory_edge, bold=True)
+
+    @property
+    def trajectory_styles(self) -> tuple[Style, Style, Style, Style, Style]:
+        return (
+            Style(color=self.trajectory_trail, dim=True),
+            Style(color=self.trajectory_levels[0]),
+            Style(color=self.trajectory_levels[1]),
+            Style(color=self.trajectory_levels[2]),
+            Style(color=self.trajectory_levels[3], bold=True),
+        )
+
+    @property
+    def home_style(self) -> Style:
+        return Style(color=self.home_marker, bold=True)
+
+    @property
+    def destination_marker_style(self) -> Style:
+        return Style(color=self.destination_marker, bold=True)
+
+    @property
+    def destination_arrival_style(self) -> Style:
+        return Style(color=self.destination_arrival, bold=True)
+
+    @property
+    def destination_reached_style(self) -> Style:
+        return Style(color=self.destination_reached, bold=True)
+
+    @property
+    def header_style(self) -> Style:
+        return Style(color=self.header, bold=True)
+
+    @property
+    def muted_style(self) -> Style:
+        return Style(color=self.muted)
+
+    @property
+    def dim_style(self) -> Style:
+        return Style(color=self.muted, dim=True)
+
+    @property
+    def warning_style(self) -> Style:
+        return Style(color=self.warning)
+
+    @property
+    def error_style(self) -> Style:
+        return Style(color=self.error)
+
+
+Theme.PRESETS = {
+    "default": Theme(
+        name="default",
+        accent="#67e8f9",
+        background="#0f172a",
+        grid="#1d4ed8",
+        land="#2f7d5f",
+        coast="#8bd8bd",
+        trajectory_edge="#00FFFF",
+        trajectory_trail="#333333",
+        trajectory_levels=("#4b5563", "#64748b", "#94a3b8", "#67e8f9"),
+        home_marker="#fb7185",
+        destination_marker="#fbbf24",
+        destination_arrival="#00FFFF",
+        destination_reached="#34d399",
+        panel_border="#38bdf8",
+        header="#67e8f9",
+        muted="#64748b",
+        warning="#fbbf24",
+        error="#ef4444",
+    ),
+    "green": Theme(
+        name="green",
+        accent="#00FF41",
+        background="#000000",
+        grid="#14532d",
+        land="#166534",
+        coast="#86efac",
+        trajectory_edge="#00FF41",
+        trajectory_trail="#052e16",
+        trajectory_levels=("#064e3b", "#047857", "#10b981", "#00FF41"),
+        home_marker="#facc15",
+        destination_marker="#00FF41",
+        destination_arrival="#bbf7d0",
+        destination_reached="#22c55e",
+        panel_border="#00FF41",
+        header="#00FF41",
+        muted="#4b5563",
+        warning="#facc15",
+        error="#ef4444",
+    ),
+    "red": Theme(
+        name="red",
+        accent="#ef4444",
+        background="#1a1a1a",
+        grid="#7f1d1d",
+        land="#57534e",
+        coast="#fca5a5",
+        trajectory_edge="#ef4444",
+        trajectory_trail="#3f1d1d",
+        trajectory_levels=("#7f1d1d", "#b91c1c", "#dc2626", "#ef4444"),
+        home_marker="#fbbf24",
+        destination_marker="#ef4444",
+        destination_arrival="#fecaca",
+        destination_reached="#f87171",
+        panel_border="#ef4444",
+        header="#ef4444",
+        muted="#737373",
+        warning="#fbbf24",
+        error="#f87171",
+    ),
+    "violet": Theme(
+        name="violet",
+        accent="#a855f7",
+        background="#1e1b4b",
+        grid="#4c1d95",
+        land="#5b4f8f",
+        coast="#c4b5fd",
+        trajectory_edge="#a855f7",
+        trajectory_trail="#312e81",
+        trajectory_levels=("#5b21b6", "#7e22ce", "#9333ea", "#a855f7"),
+        home_marker="#f0abfc",
+        destination_marker="#a855f7",
+        destination_arrival="#ddd6fe",
+        destination_reached="#c084fc",
+        panel_border="#a855f7",
+        header="#c084fc",
+        muted="#a5b4fc",
+        warning="#fbbf24",
+        error="#fb7185",
+    ),
+}
 
 @dataclass(slots=True)
 class DestinationMarker:
@@ -57,26 +236,28 @@ class DestinationMarker:
         age = self.age(now)
         return self.grow_duration <= age < self.grow_duration + self.arrival_flash
 
-    def marker_style(self, now: float) -> Style:
+    def marker_style(self, now: float, theme: Theme) -> Style:
         if self.arrived(now):
-            return DESTINATION_ARRIVAL_STYLE
+            return theme.destination_arrival_style
         if self.progress(now) >= 1.0:
-            return DESTINATION_REACHED_STYLE
-        return DESTINATION_MARKER_STYLE
+            return theme.destination_reached_style
+        return theme.destination_marker_style
 
     def alive(self, now: float) -> bool:
         return self.age(now) < self.ttl
 
 
-def show_welcome() -> None:
+def show_welcome(theme: Theme | None = None) -> None:
+    theme = theme or Theme.from_name("default")
     console = Console()
-    welcome_text = Text("\nNetOrbit\n", style="bold cyan", justify="center")
-    welcome_text.append("Real-time Network Traffic Visualizer\n", style="bright_black")
-    welcome_text.append("\nPress Ctrl+C to exit", style="dim")
+    console.clear()
+    welcome_text = Text("\nNetOrbit\n", style=theme.header_style, justify="center")
+    welcome_text.append("Real-time Network Traffic Visualizer\n", style=theme.muted_style)
+    welcome_text.append("\nPress Ctrl+C to exit", style=theme.dim_style)
 
     panel = Panel(
         Align.center(welcome_text),
-        border_style="cyan",
+        border_style=theme.panel_border,
         expand=False,
     )
     console.print(Align.center(panel))
@@ -89,10 +270,12 @@ class NetOrbitUI:
         event_queue: Queue[NetOrbitEvent],
         home: GeoPoint,
         fps: int = 12,
+        theme: Theme | None = None,
     ) -> None:
         self.event_queue = event_queue
         self.home = home
-        self.world_map = WorldMap(home=home)
+        self.theme = theme or Theme.from_name("default")
+        self.world_map = WorldMap(home=home, theme=self.theme)
         self.fps = fps
         self.markers: list[DestinationMarker] = []
         self.recent: deque[ConnectionEvent] = deque(maxlen=10)
@@ -194,7 +377,7 @@ class NetOrbitUI:
         return Panel(
             self.render_map(width=map_width, height=map_height),
             title="NetOrbit",
-            border_style="#38bdf8",
+            border_style=self.theme.panel_border,
             width=width,
             height=height,
         )
@@ -212,7 +395,7 @@ class NetOrbitUI:
             height = max(12, min(36, round(width / 4)))
         now = time.monotonic()
         markers = [
-            MapMarker(marker.point, style=marker.marker_style(now))
+            MapMarker(marker.point, style=marker.marker_style(now, self.theme))
             for marker in self.markers
         ]
         trajectories = [
@@ -240,8 +423,8 @@ class NetOrbitUI:
             pad_edge=False,
             collapse_padding=True,
             show_header=True,
-            header_style="bold #67e8f9",
-            row_styles=("", "dim"),
+            header_style=self.theme.header_style,
+            row_styles=("", self.theme.dim_style),
         )
         table.add_column("IP", overflow="fold")
         table.add_column("Country")
@@ -264,25 +447,25 @@ class NetOrbitUI:
         return Panel(
             table,
             title="Last 10 connections",
-            border_style="#38bdf8",
+            border_style=self.theme.panel_border,
             width=width,
             height=height,
         )
 
     def render_status(self, height: int | None = None) -> Panel:
         text = Text()
-        text.append(f"captured={self.captured_packets}  ", style="bold #67e8f9")
-        text.append(f"mapped={self.mapped_packets}  ", style="bold #34d399")
-        text.append(f"geo_miss={self.geo_misses}", style="#fbbf24")
+        text.append(f"captured={self.captured_packets}  ", style=self.theme.header_style)
+        text.append(f"mapped={self.mapped_packets}  ", style=self.theme.destination_reached_style)
+        text.append(f"geo_miss={self.geo_misses}", style=self.theme.warning_style)
 
         for status in self.statuses:
-            style = "red" if status.level == "error" else "bright_black"
+            style = self.theme.error_style if status.level == "error" else self.theme.muted_style
             text.append(f"\n{status.message}", style=style)
 
         if not self.statuses:
-            text.append("\nStarting sniffer...", style="bright_black")
+            text.append("\nStarting sniffer...", style=self.theme.muted_style)
 
-        return Panel(text, title="Status", border_style="#38bdf8", height=height)
+        return Panel(text, title="Status", border_style=self.theme.panel_border, height=height)
 
     def _status_height(self) -> int:
         status_lines = max(1, len(self.statuses))

@@ -16,7 +16,7 @@ from .sniffer import (
     list_ipv4_interfaces,
     run_source_pipeline,
 )
-from .ui import NetOrbitUI, show_welcome
+from .ui import NetOrbitUI, Theme, show_welcome
 
 
 DEMO_GEO = (
@@ -54,6 +54,28 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Use generated packet events instead of Scapy.",
     )
+    theme_group = parser.add_mutually_exclusive_group()
+    theme_group.add_argument(
+        "--green",
+        dest="theme",
+        action="store_const",
+        const="green",
+        help="Use the green terminal theme.",
+    )
+    theme_group.add_argument(
+        "--red",
+        dest="theme",
+        action="store_const",
+        const="red",
+        help="Use the red terminal theme.",
+    )
+    theme_group.add_argument(
+        "--violet",
+        dest="theme",
+        action="store_const",
+        const="violet",
+        help="Use the violet terminal theme.",
+    )
     parser.add_argument(
         "--list-interfaces",
         action="store_true",
@@ -64,6 +86,7 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Do not re-run through sudo when packet capture needs root privileges.",
     )
+    parser.set_defaults(theme="default")
     return parser
 
 
@@ -81,6 +104,7 @@ def main() -> None:
     ensure_capture_privileges(args, interfaces)
 
     queue: Queue[NetOrbitEvent] = Queue(maxsize=UI_QUEUE_SIZE)
+    theme = Theme.from_name(args.theme)
     geo = GeoEngine()
     home = resolve_home_point(args, geo)
     source = DemoPacketSource() if args.demo else PacketSniffer(interfaces)
@@ -89,11 +113,12 @@ def main() -> None:
         geo.prime(DEMO_GEO)
 
     run_source_pipeline(source, queue, geo)
-    show_welcome()
+    show_welcome(theme)
     ui = NetOrbitUI(
         event_queue=queue,
         home=home,
         fps=max(1, min(args.fps, 60)),
+        theme=theme,
     )
     ui.run()
 

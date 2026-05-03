@@ -2,15 +2,18 @@ from __future__ import annotations
 
 import base64
 import zlib
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import lru_cache
 from math import ceil, pi, sin
-from typing import Iterable
+from typing import TYPE_CHECKING, Iterable
 
 from rich.style import Style
 from rich.text import Text
 
 from .models import GeoPoint
+
+if TYPE_CHECKING:
+    from .ui import Theme
 
 
 MASK_WIDTH = 360
@@ -30,22 +33,6 @@ VIRTUAL_DOT_WIDTH = 2
 VIRTUAL_DOT_HEIGHT = 4
 BRAILLE_BASE = 0x2800
 BRAILLE_CHARS = tuple(chr(BRAILLE_BASE + pattern) for pattern in range(256))
-TRAJECTORY_EDGE_COLOR = "#00FFFF"
-TRAJECTORY_TRAIL_COLOR = "#333333"
-BACKGROUND_STYLE = Style(color="#0f172a")
-GRID_STYLE = Style(color="#1d4ed8", dim=True)
-LAND_STYLE = Style(color="#2f7d5f")
-COAST_STYLE = Style(color="#8bd8bd")
-TRAJECTORY_EDGE_STYLE = Style(color=TRAJECTORY_EDGE_COLOR, bold=True)
-TRAJECTORY_STYLES = (
-    Style(color=TRAJECTORY_TRAIL_COLOR, dim=True),
-    Style(color="#4b5563"),
-    Style(color="#64748b"),
-    Style(color="#94a3b8"),
-    Style(color="#67e8f9", bold=True),
-)
-HOME_STYLE = Style(color="#fb7185", bold=True)
-MARKER_STYLE = Style(color="#fbbf24", bold=True)
 
 # Natural Earth 1:110m land polygons rasterized to a 360x180 bit-mask.
 # The same equirectangular projection is used by geo_to_canvas().
@@ -58,7 +45,7 @@ c-rlmJ8vCD6o6;%TAman6Dds)md8azg@h#vTv*<8{0(=MxFbSIW>ApQpxibE!bnIo`~fOF5(qa)<_93M
 class MapMarker:
     point: GeoPoint
     char: str = "●"
-    style: Style = MARKER_STYLE
+    style: Style = field(default_factory=lambda: default_theme().destination_marker_style)
 
 
 @dataclass(frozen=True, slots=True)
@@ -83,14 +70,16 @@ class BrailleCanvas:
         "height",
         "intensities",
         "patterns",
+        "theme",
         "virtual_height",
         "virtual_width",
         "width",
     )
 
-    def __init__(self, width: int, height: int) -> None:
+    def __init__(self, width: int, height: int, theme: "Theme") -> None:
         self.width = width
         self.height = height
+        self.theme = theme
         self.virtual_width = width * VIRTUAL_DOT_WIDTH
         self.virtual_height = height * VIRTUAL_DOT_HEIGHT
         cell_count = width * height
@@ -118,7 +107,7 @@ class BrailleCanvas:
                 y, x = divmod(index, width)
                 canvas[y][x] = CanvasCell(
                     BRAILLE_CHARS[pattern],
-                    trajectory_style(self.intensities[index], self.edges[index]),
+                    trajectory_style(self.intensities[index], self.edges[index], self.theme),
                 )
 
 
@@ -136,23 +125,19 @@ class LandMask:
 
 
 class WorldMap:
-    __slots__ = ("home", "markers", "trajectories")
-
-    background_style = BACKGROUND_STYLE
-    grid_style = GRID_STYLE
-    land_style = LAND_STYLE
-    coast_style = COAST_STYLE
-    home_style = HOME_STYLE
+    __slots__ = ("home", "markers", "theme", "trajectories")
 
     def __init__(
         self,
         home: GeoPoint | None = None,
         markers: Iterable[MapMarker] | None = None,
         trajectories: Iterable[BallisticTrajectory] | None = None,
+        theme: "Theme | None" = None,
     ) -> None:
         self.home = home
         self.markers = list(markers or [])
         self.trajectories = list(trajectories or [])
+        self.theme = theme or default_theme()
 
     def render(self) -> Text:
         width, height = self._default_size()
@@ -180,7 +165,7 @@ class WorldMap:
 
         home_point = home if home is not None else self.home
         if home_point is not None:
-            self._put_geo(canvas, home_point, "●", self.home_style)
+            self._put_geo(canvas, home_point, "●", self.theme.home_style)
 
         return self._to_text(canvas)
 
@@ -188,7 +173,7 @@ class WorldMap:
         return 100, 25
 
     def _base_canvas(self, width: int, height: int) -> list[list[CanvasCell]]:
-        return [list(row) for row in base_canvas_template(width, height)]
+        return [list(row) for row in base_canvas_template(width, height, self.theme)]
 
     def _draw_trajectories(
         self,
@@ -197,7 +182,7 @@ class WorldMap:
     ) -> None:
         width = len(canvas[0])
         height = len(canvas)
-        layer = BrailleCanvas(width, height)
+        layer = BrailleCanvas(width, height, self.theme)
 
         for trajectory in trajectories:
             points = quadratic_bezier_virtual_points(
@@ -254,18 +239,23 @@ class WorldMap:
 
 
 @lru_cache(maxsize=32)
-def base_canvas_template(width: int, height: int) -> tuple[tuple[CanvasCell, ...], ...]:
-    background = CanvasCell(" ", BACKGROUND_STYLE)
+def base_canvas_template(
+    width: int,
+    height: int,
+    theme: "Theme | None" = None,
+) -> tuple[tuple[CanvasCell, ...], ...]:
+    theme = theme or default_theme()
+    background = CanvasCell(" ", theme.background_style)
     canvas = [[background for _ in range(width)] for _ in range(height)]
-    draw_grid(canvas, width, height)
-    draw_land(canvas, width, height)
+    draw_grid(canvas, width, height, theme)
+    draw_land(canvas, width, height, theme)
     return tuple(tuple(row) for row in canvas)
 
 
-def draw_grid(canvas: list[list[CanvasCell]], width: int, height: int) -> None:
-    vertical = CanvasCell("│", GRID_STYLE)
-    horizontal = CanvasCell("─", GRID_STYLE)
-    crossing = CanvasCell("┼", GRID_STYLE)
+def draw_grid(canvas: list[list[CanvasCell]], width: int, height: int, theme: "Theme") -> None:
+    vertical = CanvasCell("│", theme.grid_style)
+    horizontal = CanvasCell("─", theme.grid_style)
+    crossing = CanvasCell("┼", theme.grid_style)
 
     for lon in range(-150, 181, 30):
         x, _ = geo_to_canvas(0, lon, width, height)
@@ -279,12 +269,12 @@ def draw_grid(canvas: list[list[CanvasCell]], width: int, height: int) -> None:
             row[x] = crossing if row[x].char == "│" else horizontal
 
 
-def draw_land(canvas: list[list[CanvasCell]], width: int, height: int) -> None:
+def draw_land(canvas: list[list[CanvasCell]], width: int, height: int, theme: "Theme") -> None:
     mask = land_mask()
     x_lookup = scaled_indices(width * VIRTUAL_DOT_WIDTH, mask.width)
     y_lookup = scaled_indices(height * VIRTUAL_DOT_HEIGHT, mask.height)
 
-    full_land = CanvasCell(BRAILLE_CHARS[0xFF], LAND_STYLE)
+    full_land = CanvasCell(BRAILLE_CHARS[0xFF], theme.land_style)
     for char_y in range(height):
         virtual_y = char_y * VIRTUAL_DOT_HEIGHT
         row = canvas[char_y]
@@ -310,7 +300,7 @@ def draw_land(canvas: list[list[CanvasCell]], width: int, height: int) -> None:
             if pattern == 0xFF:
                 row[char_x] = full_land
             elif pattern:
-                row[char_x] = CanvasCell(BRAILLE_CHARS[pattern], COAST_STYLE)
+                row[char_x] = CanvasCell(BRAILLE_CHARS[pattern], theme.coast_style)
 
 
 @lru_cache(maxsize=64)
@@ -434,20 +424,26 @@ def virtual_line_points(
     return points
 
 
-def trajectory_style(intensity: float, edge: bool = False) -> Style:
+def trajectory_style(
+    intensity: float,
+    edge: bool = False,
+    theme: "Theme | None" = None,
+) -> Style:
+    theme = theme or default_theme()
     if edge:
-        return TRAJECTORY_EDGE_STYLE
+        return theme.trajectory_edge_style
 
     value = clamp_float(intensity)
+    styles = theme.trajectory_styles
     if value < 0.35:
-        return TRAJECTORY_STYLES[0]
+        return styles[0]
     if value < 0.55:
-        return TRAJECTORY_STYLES[1]
+        return styles[1]
     if value < 0.74:
-        return TRAJECTORY_STYLES[2]
+        return styles[2]
     if value < 0.88:
-        return TRAJECTORY_STYLES[3]
-    return TRAJECTORY_STYLES[4]
+        return styles[3]
+    return styles[4]
 
 
 def _unwrap_x_for_shortest_path(start_x: int, end_x: int, virtual_width: int) -> int:
@@ -467,6 +463,12 @@ def _unwrap_x_for_shortest_path(start_x: int, end_x: int, virtual_width: int) ->
 def land_mask() -> LandMask:
     data = zlib.decompress(base64.b85decode(LAND_MASK_B85.encode("ascii")))
     return LandMask(data, MASK_WIDTH, MASK_HEIGHT)
+
+
+def default_theme() -> "Theme":
+    from .ui import Theme
+
+    return Theme.from_name("default")
 
 
 def clamp(value: int, minimum: int, maximum: int) -> int:

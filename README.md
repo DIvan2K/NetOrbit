@@ -21,7 +21,12 @@
 
 ---
 
-## English
+<p align="center">
+  <a href="#english">English</a> • 
+  <a href="#русский">Русский</a>
+</p>
+
+## <a name="english"></a>English
 
 ## Why NetOrbit?
 
@@ -57,12 +62,21 @@ Want the visual experience without root or real traffic?
 
 ```bash
 netorbit --demo
+netorbit --demo --green
 ```
 
 Force a specific interface or a VPN + default-route pair:
 
 ```bash
 sudo netorbit -i tun0,wlo1
+```
+
+Run with a different color theme:
+
+```bash
+sudo netorbit --green
+sudo netorbit --red
+sudo netorbit --violet
 ```
 
 ## Key Features
@@ -92,7 +106,10 @@ sudo netorbit -i tun0,wlo1
 netorbit --help
 netorbit --list-interfaces
 netorbit --demo
+netorbit --demo --green
 sudo netorbit
+sudo netorbit --red
+sudo netorbit --violet
 sudo netorbit -i eth0
 sudo netorbit -i tun0,wlo1
 ```
@@ -115,7 +132,7 @@ sudo netorbit -i tun0,wlo1
 
 ---
 
-## Русский
+## <a name="русский"></a>Русский
 
 ## Почему NetOrbit?
 
@@ -151,12 +168,21 @@ netorbit --list-interfaces
 
 ```bash
 netorbit --demo
+netorbit --demo --green
 ```
 
 Принудительно выбрать интерфейс или пару VPN + default-route:
 
 ```bash
 sudo netorbit -i tun0,wlo1
+```
+
+Запустить с другой цветовой темой:
+
+```bash
+sudo netorbit --green
+sudo netorbit --red
+sudo netorbit --violet
 ```
 
 ## Ключевые возможности
@@ -186,7 +212,10 @@ sudo netorbit -i tun0,wlo1
 netorbit --help
 netorbit --list-interfaces
 netorbit --demo
+netorbit --demo --green
 sudo netorbit
+sudo netorbit --red
+sudo netorbit --violet
 sudo netorbit -i eth0
 sudo netorbit -i tun0,wlo1
 ```
