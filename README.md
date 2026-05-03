@@ -13,6 +13,7 @@
   <a href="https://www.python.org/downloads/"><img alt="Python 3.10+" src="https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white"></a>
   <a href="https://opensource.org/license/mit"><img alt="License MIT" src="https://img.shields.io/badge/License-MIT-00E676?style=for-the-badge"></a>
   <img alt="Fedora Support" src="https://img.shields.io/badge/Fedora-supported-51A2DA?style=for-the-badge&logo=fedora&logoColor=white">
+  <img alt="macOS Support" src="https://img.shields.io/badge/macOS-supported-000000?style=for-the-badge&logo=apple&logoColor=white">
 </p>
 
 <p align="center">
