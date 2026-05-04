@@ -35,10 +35,10 @@ NetOrbit turns raw outbound IPv4 traffic into visual intelligence. Every externa
 
 It is built for people who want network awareness without leaving the shell. No browser dashboard. No heavy desktop UI. Just a cyberpunk command center running directly in your terminal.
 
-- 🛰️ **Visual intelligence:** watch outbound connections land on a global map instead of reading dead packet logs.
-- ⚡ **Real-time tracking:** Scapy captures traffic asynchronously while the TUI keeps rendering.
-- 🧬 **Pure terminal aesthetics:** high-density Braille pixels, neon-style traces, and Rich-powered panels.
-- 🧊 **Low CPU footprint:** static map caching keeps warm renders fast, measured at **0.0044s**.
+-  **Visual intelligence:** watch outbound connections land on a global map instead of reading dead packet logs.
+-  **Real-time tracking:** Scapy captures traffic asynchronously while the TUI keeps rendering.
+-  **Pure terminal aesthetics:** high-density Braille pixels, neon-style traces, and Rich-powered panels.
+-  **Low CPU footprint:** static map caching keeps warm renders fast, measured at **0.0044s**.
 
 > [!IMPORTANT]
 > Root is required because NetOrbit captures packets through Scapy. On Linux, NetOrbit can also re-run itself through `sudo` when capture privileges are missing.
@@ -82,14 +82,14 @@ sudo netorbit --violet
 
 ## Key Features
 
-- 🌍 **Braille-rendered world map** with dense terminal pixels and a coordinate grid.
-- 🎯 **Sub-pixel accuracy** through a virtual 2x4 Braille dot layer.
-- 📡 **Async Scapy sniffing** for live outbound IPv4 capture without blocking the UI.
-- 🧠 **GeoIP resolution** via MaxMind-compatible workflows and IP-API fallback.
-- 🔥 **Live destination traces** from your home point to remote IP locations.
-- 🧾 **Recent connection panel** with IP, country, protocol, size, and interface data.
-- 🛡️ **Smart filtering** for local, private, multicast, and broadcast addresses.
-- ❄️ **Low CPU footprint** with cached static map layers and **0.0044s warm render**.
+-  **Braille-rendered world map** with dense terminal pixels and a coordinate grid.
+-  **Sub-pixel accuracy** through a virtual 2x4 Braille dot layer.
+-  **Async Scapy sniffing** for live outbound IPv4 capture without blocking the UI.
+-  **GeoIP resolution** via MaxMind-compatible workflows and IP-API fallback.
+-  **Live destination traces** from your home point to remote IP locations.
+-  **Recent connection panel** with IP, country, protocol, size, and interface data.
+-  **Smart filtering** for local, private, multicast, and broadcast addresses.
+-  **Low CPU footprint** with cached static map layers and **0.0044s warm render**.
 
 ## Tech Stack
 
@@ -141,10 +141,10 @@ NetOrbit превращает исходящий IPv4-трафик в визуа
 
 Это инструмент для тех, кому нужна сетевая осведомленность без браузерных панелей и тяжелого UI. Только терминал, живая карта и киберпанковский командный центр в одну команду.
 
-- 🛰️ **Визуальная разведка:** внешние соединения видны на карте, а не теряются в сухих логах.
-- ⚡ **Отслеживание в реальном времени:** Scapy асинхронно ловит пакеты, пока TUI продолжает рендеринг.
-- 🧬 **Чистая терминальная эстетика:** плотные Braille-пиксели, неоновые трассы и панели на Rich.
-- 🧊 **Низкая нагрузка на CPU:** кэш статической карты дает быстрый теплый рендер, измерено **0.0044s**.
+-  **Визуальная разведка:** внешние соединения видны на карте, а не теряются в сухих логах.
+-  **Отслеживание в реальном времени:** Scapy асинхронно ловит пакеты, пока TUI продолжает рендеринг.
+-  **Чистая терминальная эстетика:** плотные Braille-пиксели, неоновые трассы и панели на Rich.
+-  **Низкая нагрузка на CPU:** кэш статической карты дает быстрый теплый рендер, измерено **0.0044s**.
 
 > [!IMPORTANT]
 > Root нужен потому, что NetOrbit захватывает пакеты через Scapy. На Linux приложение также может автоматически перезапуститься через `sudo`, если прав для захвата не хватает.
@@ -188,14 +188,14 @@ sudo netorbit --violet
 
 ## Ключевые возможности
 
-- 🌍 **Карта мира на Braille** с плотной терминальной графикой и координатной сеткой.
-- 🎯 **Sub-pixel accuracy** через виртуальный слой Braille 2x4 точек.
-- 📡 **Асинхронный Scapy-sniffing** для live-захвата исходящих IPv4-пакетов без блокировки UI.
-- 🧠 **GeoIP-резолвинг** с архитектурой под MaxMind и fallback через IP-API.
-- 🔥 **Живые трассы назначений** от вашей home-точки к удаленным IP.
-- 🧾 **Панель последних соединений** с IP, страной, протоколом, размером и интерфейсом.
-- 🛡️ **Умная фильтрация** локальных, приватных, multicast и broadcast-адресов.
-- ❄️ **Низкая нагрузка на CPU** благодаря кэшу статических слоев карты и **0.0044s warm render**.
+- **Карта мира на Braille** с плотной терминальной графикой и координатной сеткой.
+- **Sub-pixel accuracy** через виртуальный слой Braille 2x4 точек.
+- **Асинхронный Scapy-sniffing** для live-захвата исходящих IPv4-пакетов без блокировки UI.
+- **GeoIP-резолвинг** с архитектурой под MaxMind и fallback через IP-API.
+- **Живые трассы назначений** от вашей home-точки к удаленным IP.
+- **Панель последних соединений** с IP, страной, протоколом, размером и интерфейсом.
+- **Умная фильтрация** локальных, приватных, multicast и broadcast-адресов.
+- **Низкая нагрузка на CPU** благодаря кэшу статических слоев карты и **0.0044s warm render**.
 
 ## Технологический стек
 
