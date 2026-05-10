@@ -55,6 +55,7 @@ pipx install git+https://github.com/ZXCurban/NetOrbit.git
 sudo netorbit
 ```
 ---
+>[!NOTE]
 >Note for Nix users: Due to internal privilege management and Scapy's need for raw socket access, please run the application using this command (works on any Linux distro with Nix installed):
 ```bash
 sudo nix --extra-experimental-features "nix-command flakes" run github:ZXCurban/NetOrbit
@@ -172,6 +173,7 @@ pipx install git+https://github.com/ZXCurban/NetOrbit.git
 sudo netorbit
 ```
 ---
+>[!NOTE]
 >Заметка для пользователей Nix: Из-за особенностей управления правами доступа и необходимости Scapy в доступе к сырым сокетам (raw sockets), пожалуйста, запускайте приложение с помощью этой команды (работает на любом Linux-дистрибутиве с установленным Nix):
 
 ```bash
