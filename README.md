@@ -12,8 +12,10 @@
 <p align="center">
   <a href="https://www.python.org/downloads/"><img alt="Python 3.10+" src="https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white"></a>
   <a href="https://opensource.org/license/mit"><img alt="License MIT" src="https://img.shields.io/badge/License-MIT-00E676?style=for-the-badge"></a>
+  <br>
   <img alt="Fedora Support" src="https://img.shields.io/badge/Fedora-supported-51A2DA?style=for-the-badge&logo=fedora&logoColor=white">
   <img alt="macOS Support" src="https://img.shields.io/badge/macOS-supported-000000?style=for-the-badge&logo=apple&logoColor=white">
+  <img alt="Nix Flake Support" src="https://img.shields.io/badge/Nix-flakes-5277C3?style=for-the-badge&logo=nixos&logoColor=white">
 </p>
 
 <p align="center">
@@ -52,7 +54,12 @@ pipx install git+https://github.com/ZXCurban/NetOrbit.git
 # Run live capture
 sudo netorbit
 ```
-
+---
+>Note for Nix users: Due to internal privilege management and Scapy's need for raw socket access, please run the application using this command (works on any Linux distro with Nix installed):
+```bash
+sudo nix --extra-experimental-features "nix-command flakes" run github:ZXCurban/NetOrbit
+```
+---
 Need to inspect available network interfaces first?
 
 ```bash
@@ -131,6 +138,12 @@ sudo netorbit -i tun0,wlo1
 - `pipx` for clean CLI installation.
 - Root privileges for real packet capture.
 
+## Contributors
+
+Special thanks to these people for making NetOrbit better:
+
+* **[DiVan2000](https://github.com/DIvan2K)** - Added Nix/NixOS support and Flake packaging.
+
 ---
 
 ## <a name="русский"></a>Русский
@@ -158,6 +171,13 @@ pipx install git+https://github.com/ZXCurban/NetOrbit.git
 # Запуск live-захвата
 sudo netorbit
 ```
+---
+>Заметка для пользователей Nix: Из-за особенностей управления правами доступа и необходимости Scapy в доступе к сырым сокетам (raw sockets), пожалуйста, запускайте приложение с помощью этой команды (работает на любом Linux-дистрибутиве с установленным Nix):
+
+```bash
+sudo nix --extra-experimental-features "nix-command flakes" run github:ZXCurban/NetOrbit
+```
+---
 
 Посмотреть доступные сетевые интерфейсы:
 
@@ -236,3 +256,9 @@ sudo netorbit -i tun0,wlo1
 - Python **3.10+**.
 - `pipx` для чистой CLI-установки.
 - Root-доступ для реального захвата пакетов.
+
+## Контрибьюторы
+
+Особая благодарность тем, кто помогает развивать проект:
+
+* **[DiVan2000](https://github.com/DIvan2K)** - добавил поддержку Nix/NixOS и упаковку в Flake.
